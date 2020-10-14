@@ -197,8 +197,6 @@ class _DatePickerComponent extends StatelessWidget {
     switch (route.pickerMode) {
       case DateTimePickerMode.date:
         pickerWidget = DatePickerWidget(
-          onMonthChangeStartWithFirstDate:
-              route.onMonthChangeStartWithFirstDate,
           minDateTime: route.minDateTime,
           maxDateTime: route.maxDateTime,
           initialDateTime: route.initialDateTime,
