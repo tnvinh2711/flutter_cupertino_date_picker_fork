@@ -14,13 +14,13 @@ const double DATETIME_PICKER_HEIGHT = 210.0;
 const double DATETIME_PICKER_TITLE_HEIGHT = 44.0;
 
 /// Default value of DatePicker's column height.
-const double DATETIME_PICKER_ITEM_HEIGHT = 36.0;
+const double DATETIME_PICKER_ITEM_HEIGHT = 40.0;
 
 /// Default value of DatePicker's item [TextStyle].
 const TextStyle DATETIME_PICKER_ITEM_TEXT_STYLE =
-    const TextStyle(color: Color(0xFF000046), fontSize: 16.0);
+const TextStyle(color: Colors.white, fontSize: 16.0);
 
-class DateTimePickerTheme with Diagnosticable {
+class DateTimePickerTheme {
   final cancelDefault = const Text('OK');
 
   /// DateTimePicker theme.

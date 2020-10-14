@@ -1,12 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 import '../date_time_formatter.dart';
 import '../date_picker_theme.dart';
 import '../date_picker_constants.dart';
 import '../i18n/date_picker_i18n.dart';
+import '../picker_custom.dart';
 import 'date_picker_title_widget.dart';
 
 /// Solar months of 31 days.
@@ -19,7 +19,6 @@ const List<int> _solarMonthsOf31Days = const <int>[1, 3, 5, 7, 8, 10, 12];
 class DatePickerWidget extends StatefulWidget {
   DatePickerWidget({
     Key key,
-    this.onMonthChangeStartWithFirstDate,
     this.minDateTime,
     this.maxDateTime,
     this.initialDateTime,
@@ -42,11 +41,11 @@ class DatePickerWidget extends StatefulWidget {
 
   final DateVoidCallback onCancel;
   final DateValueCallback onChange, onConfirm;
-  final onMonthChangeStartWithFirstDate;
 
   @override
-  State<StatefulWidget> createState() => _DatePickerWidgetState(
-      this.minDateTime, this.maxDateTime, this.initialDateTime);
+  State<StatefulWidget> createState() =>
+      _DatePickerWidgetState(
+          this.minDateTime, this.maxDateTime, this.initialDateTime);
 }
 
 class _DatePickerWidgetState extends State<DatePickerWidget> {
@@ -60,8 +59,8 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
 
   bool _isChangeDateRange = false;
 
-  _DatePickerWidgetState(
-      DateTime minDateTime, DateTime maxDateTime, DateTime initialDateTime) {
+  _DatePickerWidgetState(DateTime minDateTime, DateTime maxDateTime,
+      DateTime initialDateTime) {
     // handle current selected year、month、day
     DateTime initDateTime = initialDateTime ?? DateTime.now();
     this._currYear = initDateTime.year;
@@ -176,7 +175,7 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
   Widget _renderDatePickerWidget() {
     List<Widget> pickers = List<Widget>();
     List<String> formatArr =
-        DateTimeFormatter.splitDateFormat(widget.dateFormat);
+    DateTimeFormatter.splitDateFormat(widget.dateFormat);
     formatArr.forEach((format) {
       List<int> valueRange = _findPickerItemRange(format);
 
@@ -215,6 +214,8 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
         child: CupertinoPicker.builder(
           backgroundColor: widget.pickerTheme.backgroundColor,
           scrollController: scrollCtrl,
+          diameterRatio: 4,
+          squeeze: 1.45,
           itemExtent: widget.pickerTheme.itemHeight,
           onSelectedItemChanged: valueChanged,
           childCount: valueRange.last - valueRange.first + 1,
@@ -226,15 +227,34 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
   }
 
   Widget _renderDatePickerItemComponent(int value, String format) {
-    return Container(
+    print("Date current params : " + _currDay.toString());
+    print("Month current params : " + _currMonth.toString());
+    print("Year current params : " + _currYear.toString());
+
+    bool isCurrentValue = false;
+
+    if (format.contains('y')) {
+      isCurrentValue = _currYear == value;
+    }
+    else if (format.contains('M')) {
+      isCurrentValue = _currMonth == value;
+    }
+    else if (format.contains('d')) {
+      isCurrentValue = _currDay == value;
+    }
+
+    return Padding(
+        padding: EdgeInsets.only(bottom: 10.0, top: 10.0), child: Container(
       height: widget.pickerTheme.itemHeight,
       alignment: Alignment.center,
       child: Text(
         DateTimeFormatter.formatDateTime(value, format, widget.locale),
         style:
-            widget.pickerTheme.itemTextStyle ?? DATETIME_PICKER_ITEM_TEXT_STYLE,
+        isCurrentValue == true
+            ? widget.pickerTheme.itemTextStyle
+            : DATETIME_PICKER_ITEM_TEXT_STYLE,
       ),
-    );
+    ));
   }
 
   /// change the selection of year picker
@@ -286,11 +306,7 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
         _dayRange.first != dayRange.first || _dayRange.last != dayRange.last;
     if (dayRangeChanged) {
       // day range changed, need limit the value of selected day
-      if (!widget.onMonthChangeStartWithFirstDate) {
-        max(min(_currDay, dayRange.last), dayRange.first);
-      } else {
-        _currDay = dayRange.first;
-      }
+      _currDay = max(min(_currDay, dayRange.last), dayRange.first);
     }
 
     setState(() {
@@ -347,13 +363,13 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
 
   /// calculate the range of year
   List<int> _calcYearRange() {
-    print(_minDateTime.year.toString() + ", " + _maxDateTime.year.toString());
     return [_minDateTime.year, _maxDateTime.year];
   }
 
   /// calculate the range of month
   List<int> _calcMonthRange() {
-    int minMonth = 1, maxMonth = 12;
+    int minMonth = 1,
+        maxMonth = 12;
     int minYear = _minDateTime.year;
     int maxYear = _maxDateTime.year;
     if (minYear == _currYear) {
@@ -369,7 +385,8 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
 
   /// calculate the range of day
   List<int> _calcDayRange({currMonth}) {
-    int minDay = 1, maxDay = _calcDayCountOfMonth();
+    int minDay = 1,
+        maxDay = _calcDayCountOfMonth();
     int minYear = _minDateTime.year;
     int maxYear = _maxDateTime.year;
     int minMonth = _minDateTime.month;
